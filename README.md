@@ -45,6 +45,7 @@ Results for: GeographicLib
   * GeographicLib handles areas around -180/+180 without throwing an error
     * This is, I think, reasonably significant.  Without this there's no choice but to guard/check all input values (and you just aren't able to calculate distances, etc. with those values.
     
-# Locations where geotools can'd perform the inverse calculation with a starting point of (0,0)
+# Problem locations
+Locations where geotools can't perform the inverse calculation with a starting point of (0,0)
 (Locations shown in red)
 ![Image of Error range](https://raw.githubusercontent.com/chrisbennight/geodesy/master/src/main/resources/geotools-inverse-error.png)
