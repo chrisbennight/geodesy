@@ -2,6 +2,13 @@
 Comparing geodetic calulcations form a couple of different libaries - currently:
   * Geotools: http://geotools.org/
   * GeographicLib: http://geographiclib.sourceforge.net/
+ 
+To run the tests:
+```
+mvn compile
+mvn exec:exec
+```
+the results are printed to the console.  The image graphic will be in /target/$provider_name.png.
 
 # Results (from travis run)
 ```
