@@ -2,6 +2,7 @@ package com.bennight.geodesy;
 
 import com.bennight.geodesy.GeodesicImpl.GeographicLib;
 import com.bennight.geodesy.GeodesicImpl.Geotools;
+import com.vividsolutions.jts.geom.Coordinate;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.sf.geographiclib.Geodesic;
@@ -16,9 +17,11 @@ public class test
 {
 
 	private static final String DATA_DIR = "./target/data/";
+	private static final String COASTLINE_DIR = "./target/coastline/";
+	public static final String COASTLINE_SHAPE_FILE = "./target/coastline/ne_10m_coastline.shp";
 	private static final String DATA_FILE = DATA_DIR + "GeodTest.dat";
-	private final GeodesicCalculator[] tests = new GeodesicCalculator[] {new Geotools(), new GeographicLib()};
-	private static final int numReps = 10;
+	private final GeodesicCalculator[] tests = new GeodesicCalculator[] {new Geotools()};//, new GeographicLib()};
+	private static final int numReps = 1;
 	private static final double latitudeClipAbs = 91;
 	private static final double longitudeClipAbs = 177;
 
@@ -85,24 +88,35 @@ public class test
 			return false;
 		}
 
-
+		System.out.println("");
 		System.out.println("----------------------------------------------------------------------------------");
 		System.out.println("Testing extents (this may take awhile)");
 		System.out.println("----------------------------------------------------------------------------------");
 
+
+
 		for (GeodesicCalculator gc : tests){
+			List<Coordinate> errors = new ArrayList<>();
 			long numErrors = 0;
 			for (double lon = -180; lon < 180; lon += 0.1){
 				for (double lat = -90; lat < 90; lat += 0.1){
 					try {
 						gc.Inverse(0, 0, lat, lon);
 					} catch (Exception ex){
+						errors.add(new Coordinate(lon, lat));
 						numErrors++;
 					}
 				}
 			}
+			try {
+				MapRenderer.drawMap(gc.getName(), errors, 4096, "./target/" + gc.getName() + ".png");
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 			System.out.println("Results for: " + gc.getName());
 			System.out.println("  " + numErrors + " exceptions occurred measuring distance from (0,0) to a 0.1 degree grid across the WGS:84 ellipsoid");
+
 		}
 
 
@@ -157,5 +171,12 @@ public class test
 			ZipFile zf = new ZipFile(this.getClass().getClassLoader().getResource("GeodTest.zip").getFile());
 			zf.extractAll(DATA_DIR);
 		}
+		File f2 = new File(COASTLINE_SHAPE_FILE);
+		if (!f2.exists()){
+			f2.mkdirs();
+			ZipFile zf = new ZipFile(this.getClass().getClassLoader().getResource("ne_10m_coastline.zip").getFile());
+			zf.extractAll(COASTLINE_DIR);
+		}
 	}
 }
+
