@@ -122,6 +122,8 @@ public class MapRenderer{
 
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		} finally {
+			map.dispose();
 		}
 
 

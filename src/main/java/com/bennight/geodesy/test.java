@@ -5,7 +5,6 @@ import com.bennight.geodesy.GeodesicImpl.Geotools;
 import com.vividsolutions.jts.geom.Coordinate;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-import net.sf.geographiclib.Geodesic;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -153,8 +152,9 @@ public class test
 			}
 			InverseResults iresults = inverseResults.get(gc.getName()).get(0);
 
+			double azimuthError = iresults.Azimuth1Error / iresults.Count;
 			System.out.println("  Avg Time Per Conversion: " + (double)totalTime / totalCounts + " mSec.");
-			System.out.println("  Avg Azimuth 1 Error: " + iresults.Azimuth1Error / iresults.Count + " degrees (abs) heading.");
+			System.out.println("  Avg Azimuth 1 Error: " + (((int)azimuthError == -1) ? "Not Supported" : azimuthError + " degrees (abs) heading."));
 			System.out.println("  Avg Geodesic Distance Error: " + iresults.GeodesicDistanceError / iresults.Count + " meters (abs).");
 		}
 

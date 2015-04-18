@@ -4,11 +4,9 @@ import com.bennight.geodesy.DirectResults;
 import com.bennight.geodesy.GeodesicCalculator;
 import com.bennight.geodesy.InverseResults;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.List;
 
 
 
@@ -39,7 +37,26 @@ public abstract class AbstractCalculatorImpl
 	private static final int AREA_GEODESIC= 9;
 
 
-	abstract void direct(double lat1, double lon1, double azimuth1, double distance1,  double lat2, double lon2, double azimunth2, DirectResults dr);
+	//abstract void direct(double lat1, double lon1, double azimuth1, double distance1,  double lat2, double lon2, double azimunth2, DirectResults dr);
+
+
+	private void direct( double lat1, double lon1, double azimuth1, double distance1, double lat2, double lon2, double azimunth2, DirectResults dr ) {
+		double[] vals = Direct(lat1, lon1, azimuth1, distance1);
+		dr.Lattitude2Error = Math.abs(lat2 - vals[1]);
+		dr.Longtidue2Error = Math.abs(lon2 - vals[0]);
+		dr.Azimuth2Error = Math.abs(azimunth2  - vals[2]);
+	}
+
+	/***
+	 *
+	 * @param lat
+	 * @param lon
+	 * @param azimuth
+	 * @param distance
+	 * @return double[] {lon, lat, azimuth}
+	 */
+	 public abstract double[] Direct( double lat, double lon, double azimuth, double distance );
+
 
 	private static double[] parseLines(String line){
 		String[] s = line.split(" ");
@@ -74,7 +91,21 @@ public abstract class AbstractCalculatorImpl
 		return dr;
 	}
 
-	abstract void inverse(double lat1, double lon1, double azimuth1, double distance1,  double lat2, double lon2, double azimuth2, InverseResults ir);
+	private void inverse(double lat1, double lon1, double azimuth1, double distance1,  double lat2, double lon2, double azimuth2, InverseResults ir){
+		double[] vals = Inverse(lat1, lon1, lat2, lon2);
+		ir.Azimuth1Error = Math.abs(azimuth1 - vals[1]);
+		ir.GeodesicDistanceError = Math.abs(distance1 - vals[0]);
+	}
+
+	/***
+	 *
+	 * @param lat1
+	 * @param lon1
+	 * @param lat2
+	 * @param lon2
+	 * @return double[] {geodetic distance, azimuth};
+	 */
+	public abstract double[] Inverse( double lat1, double lon1, double lat2, double lon2 );
 
 	public InverseResults Inverse( String inputFile, double latitudeClipAbs, double longitudeClipAbs )
 		throws IOException {
