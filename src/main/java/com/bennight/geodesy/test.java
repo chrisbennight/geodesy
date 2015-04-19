@@ -21,7 +21,7 @@ public class test
 	public static final String COASTLINE_SHAPE_FILE = "./target/coastline/ne_10m_coastline.shp";
 	private static final String DATA_FILE = DATA_DIR + "GeodTest.dat";
 	private final GeodesicCalculator[] tests = new GeodesicCalculator[] {new Geotools(), new GeographicLib()};
-	private static final int numReps = 10;
+	private static final int numReps = 100;
 	private static final double latitudeClipAbs = 91;
 	private static final double longitudeClipAbs = 177;
 
