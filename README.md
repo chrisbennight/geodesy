@@ -54,6 +54,13 @@ Results for: GeographicLib
     * This is, I think, reasonably significant.  Without this there's no choice but to guard/check all input values (and you just aren't able to calculate distances, etc. with those values.
     
 # Problem locations
-Locations where geotools can't perform the inverse calculation with a starting point of (0,0)
-(Locations shown in red)
-![Image of Error range](https://raw.githubusercontent.com/chrisbennight/geodesy/master/src/main/resources/geotools-inverse-error.png)
+Looks like at first glances just an antipodal problem, which is a known issue for the vicenty method.
+Locations where geotools can't perform the inverse calculation shown in red.  Origin in (lon, lat) order.
+## Origin (0,0)
+![Image of Error range](https://raw.githubusercontent.com/chrisbennight/geodesy/master/src/main/resources/geotools-inverse-error-0-0-origin.png)
+## Origin (0,90)
+![Image of Error range](https://raw.githubusercontent.com/chrisbennight/geodesy/master/src/main/resources/geotools-inverse-error-0-90-origin.png)
+## Origin (0,-90)
+![Image of Error range](https://raw.githubusercontent.com/chrisbennight/geodesy/master/src/main/resources/geotools-inverse-error-0-Minus90-origin.png)
+#Origin (45,45)
+![Image of Error range](https://raw.githubusercontent.com/chrisbennight/geodesy/master/src/main/resources/geotools-inverse-error-45-45-origin.png)
