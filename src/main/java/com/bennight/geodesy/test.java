@@ -119,7 +119,7 @@ public class test
 			for (double lon = -180; lon < 180; lon += 0.1){
 				for (double lat = -90; lat < 90; lat += 0.1){
 					try {
-						gc.Inverse(45, 45, lat, lon);
+						gc.Inverse(0, 0, lat, lon);
 					} catch (Exception ex){
 						errors.add(new Coordinate(lon, lat));
 						numErrors++;
