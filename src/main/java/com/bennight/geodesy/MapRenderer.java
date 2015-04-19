@@ -51,6 +51,8 @@ public class MapRenderer{
 		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory(null);
 		ListFeatureCollection col = new ListFeatureCollection(pointtype);
 
+
+
 		SimpleFeatureBuilder sfb = new SimpleFeatureBuilder(pointtype);
 		int i = 0;
 		for (Coordinate c : points) {
