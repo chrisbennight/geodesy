@@ -3,7 +3,7 @@ Comparing geodetic calulcations form a couple of different libaries - currently:
   * Geotools: http://geotools.org/
   * GeographicLib: http://geographiclib.sourceforge.net/
  
-To run the tests:
+To run the tests (requires Java8):
 ```
 mvn compile
 mvn exec:exec
