@@ -3,14 +3,14 @@ Comparing geodetic calulcations form a couple of different libaries - currently:
   * Geotools: http://geotools.org/
   * GeographicLib: http://geographiclib.sourceforge.net/
  
-To run the tests:
+To run the tests (requires Java8):
 ```
 mvn compile
 mvn exec:exec
 ```
 the results are printed to the console.  The image graphic will be in /target/$provider_name.png.
 
-# Results (from travis run)
+# Results (i7-5920k)
 ```
 ----------------------------------------------------------------------------------
 Testing extents (this may take awhile)
@@ -24,24 +24,25 @@ Results for: GeographicLib
 Direct Results
 ----------------------------------------------------------------------------------
 Results for: Geotools
-  Avg Time Per Conversion: 0.10827356839998109 mSec.
-  Avg Longitude Error: 2.2961389963944247E-8 degrees (abs) longitude.
-  Avg Latitude Error: 6.4808786613413035E-12 degrees (abs) lattitude.
+  Avg Time Per Conversion: 0.00213 mSec. [0.04612] stdev.
+  Avg Longitude Error: 2.2961e-08 degrees (abs) longitude  [1.5186e-07] stdev.
+  Avg Latitude Error: 6.4809e-12 degrees (abs) longitude  [8.1105e-12] stdev.
 Results for: GeographicLib
-  Avg Time Per Conversion: 0.087290954084769 mSec.
-  Avg Longitude Error: 1.8565406729781347E-11 degrees (abs) longitude.
-  Avg Latitude Error: 7.683463537107237E-15 degrees (abs) lattitude.
+  Avg Time Per Conversion: 0.00143 mSec. [0.04469] stdev.
+  Avg Longitude Error: 1.8565e-11 degrees (abs) longitude  [1.4621e-10] stdev.
+  Avg Latitude Error: 7.6835e-15 degrees (abs) longitude  [8.5479e-15] stdev.
+  
 ----------------------------------------------------------------------------------
 Inverse Results
 ----------------------------------------------------------------------------------
 Results for: Geotools
-  Avg Time Per Conversion: 0.11805557744747254 mSec.
-  Avg Azimuth 1 Error: 2.70650828910131E-9 degrees (abs) heading.
-  Avg Geodesic Distance Error: 1.139046250480835E-6 meters (abs).
+  Avg Time Per Conversion: 0.00386 mSec. [0.06198] stdev.
+  Avg Azimuth 1 Error: 2.7065e-09 degrees (abs) heading [3.8673e-07] stdev.
+  Avg Geodesic Distance Error: 1.1390e-06 meters (abs). [1.5695e-06] stdev.
 Results for: GeographicLib
-  Avg Time Per Conversion: 0.10033888687483253 mSec.
-  Avg Azimuth 1 Error: 1.2366053228915025E-10 degrees (abs) heading.
-  Avg Geodesic Distance Error: 1.1542975682065518E-9 meters (abs).
+  Avg Time Per Conversion: 0.00260 mSec. [0.09223] stdev.
+  Avg Azimuth 1 Error: 1.2366e-10 degrees (abs) heading [3.2249e-08] stdev.
+  Avg Geodesic Distance Error: 1.1543e-09 meters (abs). [1.3611e-09] stdev.
   ```
 
 # Thoughts
