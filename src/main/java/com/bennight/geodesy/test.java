@@ -5,6 +5,7 @@ import com.bennight.geodesy.GeodesicImpl.Geotools;
 import com.vividsolutions.jts.geom.Coordinate;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import org.apache.commons.math3.stat.descriptive.AggregateSummaryStatistics;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,43 +43,60 @@ public class test
 			return false;
 		}
 
-		Map<String, List<DirectResults>> directResults = new HashMap<>(tests.length);
-		Map<String, List<InverseResults>> inverseResults = new HashMap<>(tests.length);
+
+		Map<String, Map<String, AggregateSummaryStatistics>> allDirectStats = new HashMap<>(tests.length);
+		Map<String, Map<String, AggregateSummaryStatistics>> allInverseStats = new HashMap<>(tests.length);
+
+		for (GeodesicCalculator gc : tests) {
+			Map<String, AggregateSummaryStatistics> directStats = new HashMap<>();
+			AggregateSummaryStatistics timeDirectAgg = new AggregateSummaryStatistics();
+			AggregateSummaryStatistics lonDirectAgg = new AggregateSummaryStatistics();
+			AggregateSummaryStatistics latDirectAgg = new AggregateSummaryStatistics();
+			AggregateSummaryStatistics azimuth2DirectAgg = new AggregateSummaryStatistics();
+
+			directStats.put("time", timeDirectAgg);
+			directStats.put("latitude", latDirectAgg);
+			directStats.put("longitude", lonDirectAgg);
+			directStats.put("azimuth", azimuth2DirectAgg);
+
+			allDirectStats.put(gc.getName(), directStats);
+
+			Map<String, AggregateSummaryStatistics> inverseStats = new HashMap<>();
+			AggregateSummaryStatistics timeInverseAgg = new AggregateSummaryStatistics();
+			AggregateSummaryStatistics azimuth1InverseAgg = new AggregateSummaryStatistics();
+			AggregateSummaryStatistics azimuth2InverseAgg = new AggregateSummaryStatistics();
+			AggregateSummaryStatistics geodesicInverseAgg = new AggregateSummaryStatistics();
+
+			inverseStats.put("time", timeInverseAgg);
+			inverseStats.put("distance", geodesicInverseAgg);
+			inverseStats.put("azimuth1", azimuth1InverseAgg);
+			inverseStats.put("azimuth2", azimuth2InverseAgg);
+
+			allInverseStats.put(gc.getName(), inverseStats);
+		}
+
 
 		try {
 			for (GeodesicCalculator gc : tests) {
-
 				System.out.println("");
-				System.out.println("Warming up JVM for: " + gc.getName() + " direct");
-				DirectResults dr = gc.Direct(DATA_FILE, latitudeClipAbs, longitudeClipAbs);
-
-				dr = null;
-				directResults.put(gc.getName(), new ArrayList<DirectResults>(numReps));
-
 				System.out.println("----------------------------------------------------------------------------------");
 				System.out.println("Beginning " + numReps + " repititions for " + gc.getName() + " direct computation.");
 				System.out.println("----------------------------------------------------------------------------------");
+				DirectResults dr = null;
 				for (int i = 0; i < numReps; i++) {
-					dr = gc.Direct(DATA_FILE, latitudeClipAbs, longitudeClipAbs);
-					System.out.println("  Time for rep " + i + " for " + gc.getName() + " direct was " + dr.Milliseconds / 1000d + " seconds (" + dr.Count + " conversions)");
-					directResults.get(gc.getName()).add(dr);
+					dr = gc.Direct(DATA_FILE, latitudeClipAbs, longitudeClipAbs, allDirectStats.get(gc.getName()));
+					System.out.println("  Average time for rep " + i + " for " + gc.getName() + " direct was " + String.format("%.5f", dr.MillisecondsStats.getMean()) + " msec (" + String.format("%.5f", dr.MillisecondsStats.getStandardDeviation()) + " stDev)");
 				}
 				System.out.println("  Finished " + numReps + " reps for " + gc.getName() + " direct.");
 
-
 				System.out.println("");
-				System.out.println("Warming up JVM for: " + gc.getName() + " inverse");
-				InverseResults ir = gc.Inverse(DATA_FILE, latitudeClipAbs, longitudeClipAbs);
-
-				ir = null;
-				inverseResults.put(gc.getName(), new ArrayList<InverseResults>(numReps));
 				System.out.println("----------------------------------------------------------------------------------");
 				System.out.println("Beginning " + numReps + " repititions for " + gc.getName() + " inverse computation.");
 				System.out.println("----------------------------------------------------------------------------------");
+				InverseResults ir = null;
 				for (int i = 0; i < numReps; i++) {
-					ir = gc.Inverse(DATA_FILE, latitudeClipAbs, longitudeClipAbs);
-					System.out.println("  Time for rep " + i + " for " + gc.getName() + " inverse was " + ir.Milliseconds / 1000d + " seconds (" + ir.Count + " conversions)");
-					inverseResults.get(gc.getName()).add(ir);
+					ir = gc.Inverse(DATA_FILE, latitudeClipAbs, longitudeClipAbs, allInverseStats.get(gc.getName()));
+					System.out.println("  Average time for rep " + i + " for " + gc.getName() + " inverse was " + String.format("%.5f", ir.MillisecondsStats.getMean()) + " msec (" + String.format("%.5f", ir.MillisecondsStats.getStandardDeviation()) + " stDev)");
 				}
 				System.out.println("  Finished " + numReps + " reps for " + gc.getName() + " inverse.");
 			}
@@ -126,40 +144,24 @@ public class test
 		System.out.println("Direct Results");
 		System.out.println("----------------------------------------------------------------------------------");
 		for (GeodesicCalculator gc : tests){
+			Map<String, AggregateSummaryStatistics> das = allDirectStats.get(gc.getName());
 			System.out.println("Results for: " + gc.getName());
-			long totalTime = 0;
-			long totalCounts = 0;
-			for (DirectResults dr : directResults.get(gc.getName())){
-				totalTime += dr.Milliseconds;
-				totalCounts = dr.Count;
-			}
-			DirectResults dresults = directResults.get(gc.getName()).get(0);
-			System.out.println("  Avg Time Per Conversion: " + (double)totalTime / totalCounts + " mSec.");
-			System.out.println("  Avg Longitude Error: " + dresults.Longtidue2Error / dresults.Count + " degrees (abs) longitude.");
-			System.out.println("  Avg Latitude Error: " + dresults.Lattitude2Error / dresults.Count + " degrees (abs) lattitude.");
+			System.out.println("  Avg Time Per Conversion: " + String.format("%.5f",das.get("time").getMean()) + " mSec. [" + String.format("%.5f", das.get("time").getStandardDeviation()) + "] stdev.");
+			System.out.println("  Avg Longitude Error: " + String.format("%.4e",das.get("longitude").getMean()) + " degrees (abs) longitude  [" + String.format("%.4e", das.get("longitude").getStandardDeviation()) + "] stdev.");
+			System.out.println("  Avg Latitude Error: " + String.format("%.4e",das.get("latitude").getMean()) + " degrees (abs) longitude  [" + String.format("%.4e",das.get("latitude").getStandardDeviation()) + "] stdev.");
 		}
 
 		System.out.println("----------------------------------------------------------------------------------");
 		System.out.println("Inverse Results");
 		System.out.println("----------------------------------------------------------------------------------");
 		for (GeodesicCalculator gc : tests){
+			Map<String, AggregateSummaryStatistics> ias = allInverseStats.get(gc.getName());
 			System.out.println("Results for: " + gc.getName());
-			long totalTime = 0;
-			long totalCounts = 0;
-			for (InverseResults ir : inverseResults.get(gc.getName())){
-				totalTime += ir.Milliseconds;
-				totalCounts = ir.Count;
-			}
-			InverseResults iresults = inverseResults.get(gc.getName()).get(0);
-
-			double azimuthError = iresults.Azimuth1Error / iresults.Count;
-			System.out.println("  Avg Time Per Conversion: " + (double)totalTime / totalCounts + " mSec.");
-			System.out.println("  Avg Azimuth 1 Error: " + (((int)azimuthError == -1) ? "Not Supported" : azimuthError + " degrees (abs) heading."));
-			System.out.println("  Avg Geodesic Distance Error: " + iresults.GeodesicDistanceError / iresults.Count + " meters (abs).");
+			int azimuthError = (int)ias.get("azimuth1").getMean();
+			System.out.println("  Avg Time Per Conversion: " + String.format("%.5f",ias.get("time").getMean()) + " mSec. [" + String.format("%.5f", ias.get("time").getStandardDeviation()) + "] stdev.");
+			System.out.println("  Avg Azimuth 1 Error: " + ((azimuthError == -1) ? "Not Supported" : String.format("%.4e",ias.get("azimuth1").getMean()) + " degrees (abs) heading [" + String.format("%.4e", ias.get("azimuth1").getStandardDeviation()) + "] stdev."));
+			System.out.println("  Avg Geodesic Distance Error: " + String.format("%.4e",ias.get("distance").getMean()) + " meters (abs). [" + String.format("%.4e", ias.get("distance").getStandardDeviation()) + "] stdev.");
 		}
-
-
-
 		return true;
 	}
 

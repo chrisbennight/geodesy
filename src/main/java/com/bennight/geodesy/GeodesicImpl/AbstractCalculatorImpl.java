@@ -3,12 +3,12 @@ package com.bennight.geodesy.GeodesicImpl;
 import com.bennight.geodesy.DirectResults;
 import com.bennight.geodesy.GeodesicCalculator;
 import com.bennight.geodesy.InverseResults;
+import org.apache.commons.math3.stat.descriptive.AggregateSummaryStatistics;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
-
+import java.util.Map;
 
 public abstract class AbstractCalculatorImpl
 		implements GeodesicCalculator
@@ -67,12 +67,16 @@ public abstract class AbstractCalculatorImpl
 		return d;
 	}
 
-	public DirectResults Direct( String inputFile, double latitudeClipAbs, double longitudeClipAbs )
+	public DirectResults Direct( String inputFile, double latitudeClipAbs, double longitudeClipAbs, Map<String, AggregateSummaryStatistics> aggStats )
 			throws IOException {
 
 		DirectResults dr = new DirectResults();
+		dr.MillisecondsStats = aggStats.get("time").createContributingStatistics();
+		dr.Lattitude2ErrorStats = aggStats.get("latitude").createContributingStatistics();
+		dr.Longitude2ErrorStats = aggStats.get("longitude").createContributingStatistics();
+		dr.Azimuth2ErrorStats = aggStats.get("azimuth").createContributingStatistics();
 		DirectResults tmp = new DirectResults();
-		long time = System.currentTimeMillis();
+
 		for (String l :Files.readAllLines(Paths.get(inputFile))){
 			double[] items = parseLines(l);
 			if (Math.abs(items[LAT1]) > latitudeClipAbs || Math.abs(items[LAT2]) > latitudeClipAbs){
@@ -81,13 +85,14 @@ public abstract class AbstractCalculatorImpl
 			if (Math.abs(items[LON1]) > longitudeClipAbs || Math.abs(items[LON2]) > longitudeClipAbs){
 				continue;
 			}
+			long time = System.currentTimeMillis();
 			direct(items[LAT1], items[LON1], items[AZIMUTH1], items[GEODESIC_DISTANCE], items[LAT2], items[LON2], items[AZIMUTH2], tmp);
-			dr.Lattitude2Error += tmp.Lattitude2Error;
-			dr.Longtidue2Error += tmp.Longtidue2Error;
-			dr.Azimuth2Error += tmp.Azimuth2Error;
+			dr.MillisecondsStats.addValue(System.currentTimeMillis() - time);
+			dr.Lattitude2ErrorStats.addValue(tmp.Lattitude2Error);
+			dr.Longitude2ErrorStats.addValue(tmp.Longtidue2Error);
+			dr.Azimuth2ErrorStats.addValue(tmp.Azimuth2Error);
 			dr.Count++;
 		}
-		dr.Milliseconds = System.currentTimeMillis() - time;
 		return dr;
 	}
 
@@ -107,11 +112,14 @@ public abstract class AbstractCalculatorImpl
 	 */
 	public abstract double[] Inverse( double lat1, double lon1, double lat2, double lon2 );
 
-	public InverseResults Inverse( String inputFile, double latitudeClipAbs, double longitudeClipAbs )
+	public InverseResults Inverse( String inputFile, double latitudeClipAbs, double longitudeClipAbs, Map<String, AggregateSummaryStatistics> aggStats  )
 		throws IOException {
 		InverseResults ir = new InverseResults();
+		ir.MillisecondsStats = aggStats.get("time").createContributingStatistics();
+		ir.GeodesicDistanceErrorStats = aggStats.get("distance").createContributingStatistics();
+		ir.Azimuth1ErrorStats = aggStats.get("azimuth1").createContributingStatistics();
+		ir.Azimuth2ErrorStats = aggStats.get("azimuth2").createContributingStatistics();
 		InverseResults tmp = new InverseResults();
-		long time = System.currentTimeMillis();
 		for (String l :Files.readAllLines(Paths.get(inputFile))){
 			double[] items = parseLines(l);
 			if (Math.abs(items[LAT1]) > latitudeClipAbs || Math.abs(items[LAT2]) > latitudeClipAbs){
@@ -120,13 +128,14 @@ public abstract class AbstractCalculatorImpl
 			if (Math.abs(items[LON1]) > longitudeClipAbs || Math.abs(items[LON2]) > longitudeClipAbs){
 				continue;
 			}
+			long time = System.currentTimeMillis();
 			inverse(items[LAT1], items[LON1], items[AZIMUTH1], items[GEODESIC_DISTANCE], items[LAT2], items[LON2], items[AZIMUTH2], tmp);
-			ir.Azimuth1Error += tmp.Azimuth1Error;
-			ir.Azimuth2Error += tmp.Azimuth2Error;
-			ir.GeodesicDistanceError += tmp.GeodesicDistanceError;
+			ir.MillisecondsStats.addValue(System.currentTimeMillis() - time);
+			ir.Azimuth1ErrorStats.addValue(tmp.Azimuth1Error);
+			ir.Azimuth2ErrorStats.addValue(tmp.Azimuth2Error);
+			ir.GeodesicDistanceErrorStats.addValue(tmp.GeodesicDistanceError);
 			ir.Count++;
 		}
-		ir.Milliseconds = System.currentTimeMillis() - time;
 		return ir;
 	}
 }
