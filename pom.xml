@@ -19,6 +19,11 @@
             <name>Open Source Geospatial Foundation Repository</name>
             <url>http://download.osgeo.org/webdav/geotools/</url>
         </repository>
+        <repository>
+            <id>sonatype-public</id>
+            <url>https://oss.sonatype.org/content/groups/public</url>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
     </repositories>
 
     <build>
@@ -92,6 +97,11 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>3.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.geographiclib</groupId>
+            <artifactId>GeographicLib-Java</artifactId>
+            <version>1.42-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
